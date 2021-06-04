@@ -2,13 +2,7 @@
 This is the memo for Task 1 of the code audition
 """
 
-import argparse
-import json
 import logging
-
-from datetime import datetime
-
-import requests
 
 
 logging.basicConfig(
