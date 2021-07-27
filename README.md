@@ -15,7 +15,7 @@ source venv/bin/activate
 
 ```bash
 pip install -r requirements.txt
-pip install -r requirements_test.txt
+pip install -r tests/requirements_test.txt
 ```
 
 3. Install the package for development:
@@ -41,5 +41,5 @@ pytest
 To run a specific test:
 
 ```bash
-pytest tests/test_asteroids_tracker.py::test_2021_01_01_to_2021_01_02_success
+pytest tests/test_asteroid_tracker.py::test_2021_01_01_to_2021_01_02_success_200
 ```

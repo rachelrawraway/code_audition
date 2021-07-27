@@ -1,5 +1,5 @@
 """
-This is the memo for Task 1 of the code audition
+The Asteroid Tracker program
 """
 
 import logging
@@ -20,7 +20,7 @@ API_URL = 'https://api.nasa.gov/neo/rest/v1/feed?start_date=%s&end_date=%s&api_k
 
 def main():
     """
-    Main function which takes input arguments and calls relevant functions.
+    Main function which parses input and calculates statistics.
     """
 
     start_date = None
