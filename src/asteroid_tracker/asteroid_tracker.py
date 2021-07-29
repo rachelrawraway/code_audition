@@ -16,11 +16,9 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
+format_Error = False
 
 API_URL = 'https://api.nasa.gov/neo/rest/v1/feed?start_date=%s&end_date=%s&api_key=DEMO_KEY'
-
-format_Error = False
 
 
 def main():
@@ -32,25 +30,30 @@ def main():
     end_date = None
 
     # TODO: Task 1 - Gather user input
-    start_date, end_date = input(" ").split()
-    global format_Error
+    # start_date, end_date = input(" ").split()
+    start_date = '2021-01-01'
+    end_date = '2021-01-02'
 
-    # start_date
-    # year, month, day = map(int, start_date.split('-'))
-    # start_date = datetime.date(year, month, day)
+    global format_Error
     try:
         datetime.datetime.strptime(start_date, '%Y-%m-%d')
     except ValueError:
         format_Error = True
+
+    try:
+        datetime.datetime.strptime(end_date, '%Y-%m-%d')
+    except ValueError:
+        format_Error = True
+    # start_date
+    # year, month, day = map(int, start_date.split('-'))
+    # start_date = datetime.date(year, month, day)
+
     # start_date = start_date.strip()
 
     # end_date
     # year, month, day = map(int, end_date.split('-'))
     # end_date = datetime.date(year, month, day)
-    try:
-        datetime.datetime.strptime(end_date, '%Y-%m-%d')
-    except ValueError:
-        format_Error = True
+
     # end_date = end_date.strip()
 
     stats = calculate_statistics(start_date, end_date)
@@ -69,7 +72,7 @@ def calculate_statistics(start_date, end_date):
                 {
                     'code': '400',
                     'type': 'BAD_REQUEST',
-                    'message': 'The error message',
+                    'message': 'Expected format (yyyy-mm-dd)',
                 }
             ]
         }
@@ -103,9 +106,12 @@ def calculate_statistics(start_date, end_date):
     # print(json_data['near_earth_objects'][end_date][0][keyVal]['meters']['estimated_diameter_max'])
     for nearEarthObject in json_data['near_earth_objects']:
         for item in json_data['near_earth_objects'][nearEarthObject]:
-            if item['estimated_diameter']['meters']['estimated_diameter_max'] > maximum:
-                maximum = item['estimated_diameter']['meters']['estimated_diameter_max']
+            val = item['estimated_diameter']['meters']['estimated_diameter_max']
+            if val > maximum:
+                maximum = val
                 min_diam = item['estimated_diameter']['meters']['estimated_diameter_min']
+    print(maximum)
+    print(min_diam)
     largest_diameter_meters = (maximum + min_diam) / 2
 
     # nearest_miss_kms
@@ -115,8 +121,9 @@ def calculate_statistics(start_date, end_date):
     for nearEarthObject in json_data['near_earth_objects']:
         for item in json_data['near_earth_objects'][nearEarthObject]:
             for item2 in item['close_approach_data']:
-                if item2['miss_distance']['kilometers'] < minimum:
-                    minimum = item2['miss_distance']['kilometers']
+                val2 = item2['miss_distance']['kilometers']
+                if float(item2['miss_distance']['kilometers']) < float(minimum):
+                    minimum = float(item2['miss_distance']['kilometers'])
     nearest_miss_kms = minimum
     nearest_miss_kms = float(nearest_miss_kms)
 
