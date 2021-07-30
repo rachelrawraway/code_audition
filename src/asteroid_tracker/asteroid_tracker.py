@@ -30,9 +30,9 @@ def main():
     end_date = None
 
     # TODO: Task 1 - Gather user input
-    # start_date, end_date = input(" ").split()
-    start_date = '2021-01-01'
-    end_date = 'fff'
+    start_date, end_date = input(" ").split()
+    # start_date = '2021-01-01'
+    # end_date = 'fff'
 
 
     # start_date
