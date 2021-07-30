@@ -32,18 +32,9 @@ def main():
     # TODO: Task 1 - Gather user input
     # start_date, end_date = input(" ").split()
     start_date = '2021-01-01'
-    end_date = '2021-01-02'
+    end_date = 'fff'
 
-    global format_Error
-    try:
-        datetime.datetime.strptime(start_date, '%Y-%m-%d')
-    except ValueError:
-        format_Error = True
 
-    try:
-        datetime.datetime.strptime(end_date, '%Y-%m-%d')
-    except ValueError:
-        format_Error = True
     # start_date
     # year, month, day = map(int, start_date.split('-'))
     # start_date = datetime.date(year, month, day)
@@ -65,78 +56,82 @@ def calculate_statistics(start_date, end_date):
     Make an API request and calculate statistics.
     """
     # TODO: Task 2 - Prepare and make the HTTP request
+    global format_Error
+    try:
+        datetime.datetime.strptime(start_date, '%Y-%m-%d')
+    except ValueError:
+        format_Error = True
+
+    try:
+        datetime.datetime.strptime(end_date, '%Y-%m-%d')
+    except ValueError:
+        format_Error = True
+
+    d_error = {'code': 400, 'type': 'BAD_REQUEST', 'message': 'Date Format Exception - Expected format (yyyy-mm-dd) - The Feed date limit is only 7 Days', }
+    dict_error = {'error': d_error}
 
     if format_Error:
+        return dict_error
+
+    else:
+        url = API_URL % (start_date, end_date)
+        response = requests.get(url)
+        # print(response.content)
+
+        json_data = json.loads(response.content)
+        # print(json.dumps(json_data, indent = 4))
+
+        # num_asteroids
+        keyVal = 'element_count'
+        if keyVal in json_data:
+            num_asteroids = json_data[keyVal]
+
+        # num_potentially_hazardous_asteroids
+        num_potentially_hazardous_asteroids = 0
+        count = 0
+
+        for nearEarthObject in json_data['near_earth_objects']:
+            for item in json_data['near_earth_objects'][nearEarthObject]:
+                if item['is_potentially_hazardous_asteroid']:
+                    count = count + 1
+        num_potentially_hazardous_asteroids = count
+
+        # largest_estimated_diameter_meters
+        maximum = 0
+        min_diam = 0
+
+        # print(json_data['near_earth_objects'][end_date][0][keyVal]['meters']['estimated_diameter_max'])
+        for nearEarthObject in json_data['near_earth_objects']:
+            for item in json_data['near_earth_objects'][nearEarthObject]:
+                val = item['estimated_diameter']['meters']['estimated_diameter_max']
+                if val > maximum:
+                    maximum = val
+                    min_diam = item['estimated_diameter']['meters']['estimated_diameter_min']
+        largest_diameter_meters = (maximum + min_diam) / 2
+
+        # nearest_miss_kms
+        nearest_miss_kms = -1
+        minimum = 0
+        minimum = json_data['near_earth_objects'][end_date][0]['close_approach_data'][0]['miss_distance']['kilometers']
+        for nearEarthObject in json_data['near_earth_objects']:
+            for item in json_data['near_earth_objects'][nearEarthObject]:
+                for item2 in item['close_approach_data']:
+                    val2 = item2['miss_distance']['kilometers']
+                    if float(item2['miss_distance']['kilometers']) < float(minimum):
+                        minimum = float(item2['miss_distance']['kilometers'])
+        nearest_miss_kms = minimum
+        nearest_miss_kms = float(nearest_miss_kms)
+
+        # TODO: Task 3 - Calculate statistics
+
         return {
-            'error': [
-                {
-                    'code': '400',
-                    'type': 'BAD_REQUEST',
-                    'message': 'Expected format (yyyy-mm-dd)',
-                }
-            ]
+            'start_date': start_date,
+            'end_date': end_date,
+            'num_asteroids': num_asteroids,
+            'num_potentially_hazardous_asteroids': num_potentially_hazardous_asteroids,
+            'largest_diameter_meters': largest_diameter_meters,
+            'nearest_miss_kms': nearest_miss_kms,
         }
-
-    url = API_URL % (start_date, end_date)
-    response = requests.get(url)
-    # print(response.content)
-
-    json_data = json.loads(response.content)
-    # print(json.dumps(json_data, indent = 4))
-
-    # num_asteroids
-    keyVal = 'element_count'
-    if keyVal in json_data:
-        num_asteroids = json_data[keyVal]
-
-    # num_potentially_hazardous_asteroids
-    num_potentially_hazardous_asteroids = 0
-    count = 0
-
-    for nearEarthObject in json_data['near_earth_objects']:
-        for item in json_data['near_earth_objects'][nearEarthObject]:
-            if item['is_potentially_hazardous_asteroid']:
-                count = count + 1
-    num_potentially_hazardous_asteroids = count
-
-    # largest_estimated_diameter_meters
-    maximum = 0
-    min_diam = 0
-
-    # print(json_data['near_earth_objects'][end_date][0][keyVal]['meters']['estimated_diameter_max'])
-    for nearEarthObject in json_data['near_earth_objects']:
-        for item in json_data['near_earth_objects'][nearEarthObject]:
-            val = item['estimated_diameter']['meters']['estimated_diameter_max']
-            if val > maximum:
-                maximum = val
-                min_diam = item['estimated_diameter']['meters']['estimated_diameter_min']
-    print(maximum)
-    print(min_diam)
-    largest_diameter_meters = (maximum + min_diam) / 2
-
-    # nearest_miss_kms
-    nearest_miss_kms = -1
-    minimum = 0
-    minimum = json_data['near_earth_objects'][end_date][0]['close_approach_data'][0]['miss_distance']['kilometers']
-    for nearEarthObject in json_data['near_earth_objects']:
-        for item in json_data['near_earth_objects'][nearEarthObject]:
-            for item2 in item['close_approach_data']:
-                val2 = item2['miss_distance']['kilometers']
-                if float(item2['miss_distance']['kilometers']) < float(minimum):
-                    minimum = float(item2['miss_distance']['kilometers'])
-    nearest_miss_kms = minimum
-    nearest_miss_kms = float(nearest_miss_kms)
-
-    # TODO: Task 3 - Calculate statistics
-
-    return {
-        'start_date': start_date,
-        'end_date': end_date,
-        'num_asteroids': num_asteroids,
-        'num_potentially_hazardous_asteroids': num_potentially_hazardous_asteroids,
-        'largest_diameter_meters': largest_diameter_meters,
-        'nearest_miss_kms': nearest_miss_kms,
-    }
 
 
 def print_statistics(stats):
