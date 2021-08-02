@@ -28,7 +28,7 @@ def test_2021_01_01_to_2021_01_02_success_200():
     num_potentially_hazardous_asteroids = 3
 
     largest_diameter_meters = 469.399494
-    nearest_miss_kms = 71330162.334257
+    nearest_miss_kms = 237201.814200094
 
     # Setup response mock
 
